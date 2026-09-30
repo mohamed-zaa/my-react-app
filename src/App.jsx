@@ -2,35 +2,70 @@
 // import ToggleButton from './ToggleButton'
 
 // import TodoList from './To-do list';
+import React, { useState, useEffect } from 'react';
 
-import { useState,useEffect } from 'react';
-
-
-
-function App() {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
+const Countdown = () => {
+  const [initialTime, setInitialTime] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setCoords({
-        x: e.clientX,
-        y: e.clientY
-      });
-    };
+    let timerId;
+    if (isRunning && timeLeft > 0) {
+      timerId = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    }
 
-    window.addEventListener('mousemove', handleMouseMove);
+    
+    return () => clearInterval(timerId);
+  }, [isRunning, timeLeft]);
 
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
+  const handleStart = () => {
+    if (timeLeft > 0) {
+      setIsRunning(true);
+    }
+  };
+
+  const handleStop = () => {
+    setIsRunning(false);
+  };
+
+  const handleReset = () => {
+    setIsRunning(false);
+    setTimeLeft(initialTime);
+  };
+
+  const handleInputChange = (e) => {
+    const value = Number(e.target.value);
+    setInitialTime(value);
+    setTimeLeft(value);
+    setIsRunning(false);
+  };
 
   return (
     <div>
-      <p>Mouse X: {coords.x}</p>
-      <p>Mouse Y: {coords.y}</p>
+      <h2>Countdown Timer</h2>
+      <label>Set Time (seconds): </label>
+      <input
+        type="number"
+        value={initialTime}
+        onChange={handleInputChange}
+      />
+      <p>Time Left: {timeLeft} seconds</p>
+      <button onClick={handleStart} disabled={isRunning || timeLeft === 0}>
+        Start
+      </button>
+      <button onClick={handleStop} disabled={!isRunning}>
+        Stop
+      </button>
+      <button onClick={handleReset}>
+        Reset
+      </button>
     </div>
   );
-}
+};
 
-export default App;
+export default Countdown;
+
+
