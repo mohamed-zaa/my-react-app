@@ -4,68 +4,80 @@
 // import TodoList from './To-do list';
 import React, { useState, useEffect } from 'react';
 
-const Countdown = () => {
-  const [initialTime, setInitialTime] = useState(30);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [isRunning, setIsRunning] = useState(false);
 
+const GitHubUserSearch = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Log any errors to the console whenever "error" changes
   useEffect(() => {
-    let timerId;
-    if (isRunning && timeLeft > 0) {
-      timerId = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
+    if (error) {
+      console.error('Error fetching GitHub user:', error);
     }
+  }, [error]);
 
-    
-    return () => clearInterval(timerId);
-  }, [isRunning, timeLeft]);
+  const handleSearch = async () => {
+    if (!searchTerm)
+       return;
 
-  const handleStart = () => {
-    if (timeLeft > 0) {
-      setIsRunning(true);
+    setLoading(true);
+    setError('');
+    setUserData(null);
+
+    try {
+      // 1-second delay before fetching
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const response = await fetch(
+        `https://api.github.com/users/${searchTerm.toLowerCase()}`
+      );
+
+      if (!response.ok) {
+        throw new Error('GitHub user not found');
+      }
+
+      const data = await response.json();
+      setUserData(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleStop = () => {
-    setIsRunning(false);
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-    setTimeLeft(initialTime);
-  };
-
-  const handleInputChange = (e) => {
-    const value = Number(e.target.value);
-    setInitialTime(value);
-    setTimeLeft(value);
-    setIsRunning(false);
   };
 
   return (
     <div>
-      <h2>Countdown Timer</h2>
-      <label>Set Time (seconds): </label>
+      <h2>GitHub User Search</h2>
       <input
-        type="number"
-        value={initialTime}
-        onChange={handleInputChange}
+        type="text"
+        placeholder="Enter GitHub username..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <p>Time Left: {timeLeft} seconds</p>
-      <button onClick={handleStart} disabled={isRunning || timeLeft === 0}>
-        Start
-      </button>
-      <button onClick={handleStop} disabled={!isRunning}>
-        Stop
-      </button>
-      <button onClick={handleReset}>
-        Reset
-      </button>
+      <button onClick={handleSearch}>Search</button>
+
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+      {userData && (
+        <div style={{ marginTop: '1rem' }}>
+          <h3>{userData.name || userData.login}</h3>
+          <img
+            src={userData.avatar_url}
+            alt={userData.login}
+            width="100"
+            style={{ borderRadius: '50%' }}
+          />
+          <p>Location: {userData.location || 'N/A'}</p>
+          <p>Public Repos: {userData.public_repos}</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Countdown;
+export default GitHubUserSearch;
 
 
