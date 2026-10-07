@@ -7,7 +7,7 @@ const LoginForm = () => {
 
   const handleLogin = (event) => {
     event.preventDefault();
-    // Simulate authentication
+    
     if (username && password) {
       setIsLoggedIn(true);
     }
@@ -22,7 +22,7 @@ const LoginForm = () => {
   if (isLoggedIn) {
     return (
       <div>
-        <h1>Welcome, {username}!</h1>
+        <h1>Welcome , {username}!</h1>
         <button onClick={handleLogout}>Logout</button>
       </div>
     );
