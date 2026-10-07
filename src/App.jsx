@@ -1,10 +1,11 @@
-import LoginForm from "./LoginForm";
+
+import Counter from "./Counter";
 
 const App = () => {
   return (
     <div>
-      <LoginForm />
-    </div>
+ <Counter />
+         </div>
   );
 };
 
