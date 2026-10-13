@@ -1,14 +1,13 @@
 
-// import Counter from "./Counter";
-import DoubleCounter from "./DoubleCounter";
+import React from 'react';
+import MultiStepForm from './MultiStepForm';
 
-const App = () => {
+function App() {
   return (
     <div>
- {/* <Counter /> */}
- <DoubleCounter />
-         </div>
+      <MultiStepForm />
+    </div>
   );
-};
+}
 
 export default App;
