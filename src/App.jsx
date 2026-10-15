@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import CartContext from './CartContext';
-import ItemProduct from './ItemProduct';
+import ProductItem from './ItemProduct';
 import CartSummary from './CartSummary';
 
 function App() {
