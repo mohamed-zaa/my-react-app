@@ -1,26 +1,28 @@
 
-
-
-
-
 import React, { useState } from 'react';
-import LanguageContext from './LanguageContext';
-import Greeting from './Greeting';
+import CartContext from './CartContext';
+import ItemProduct from './ItemProduct';
+import CartSummary from './CartSummary';
 
 function App() {
-  const [language, setLanguage] = useState('en');
+  const [cartItems, setCartItems] = useState([]);
 
-  const toggleLanguage = () => {
-    setLanguage((prevLang) => (prevLang === 'en' ? 'es' : 'en'));
+  const addToCart = (item) => {
+    setCartItems([...cartItems, item]);
   };
 
+  const removeFromCart = (itemId) => {
+    setCartItems(cartItems.filter((item) => item.id !== itemId));
+  };
+
+  const value = { cartItems, addToCart, removeFromCart };
+
   return (
-    <LanguageContext.Provider value={language}>
-      <button onClick={toggleLanguage}>
-        Switch to {language === 'en' ? 'Spanish' : 'English'}
-      </button>
-      <Greeting />
-    </LanguageContext.Provider>
+    <CartContext.Provider value={value}>
+      <ProductItem itemId={1} itemName="Widget" price={19.99} />
+      <ProductItem itemId={2} itemName="Gadget" price={29.99} />
+      <CartSummary />
+    </CartContext.Provider>
   );
 }
 
