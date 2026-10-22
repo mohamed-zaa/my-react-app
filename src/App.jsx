@@ -1,10 +1,7 @@
-
-import ContactForm from './ContactForm';
+import ContactApp from './ContactApp';
 
 function App() {
-  return (
-    <ContactForm />
-  );
+  return <ContactApp />;
 }
 
 export default App;
