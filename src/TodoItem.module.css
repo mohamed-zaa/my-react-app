@@ -1,0 +1,53 @@
+.item {
+  min-height: 56px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.todoContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.todoContent input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #087cff;
+  flex-shrink: 0;
+}
+
+.text {
+  font-size: 16px;
+  color: #344054;
+  overflow-wrap: anywhere;
+}
+
+.completed {
+  font-size: 16px;
+  color: #98a2b3;
+  text-decoration: line-through;
+  overflow-wrap: anywhere;
+}
+
+.delete {
+  border: none;
+  background: transparent;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.delete:hover {
+  color: darkred;
+  text-decoration: underline;
+}

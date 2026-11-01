@@ -1,0 +1,15 @@
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 32px;
+  background: white;
+  border-radius: 13px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.title {
+  text-align: center;
+  font-size: 28px;
+  color: #202938;
+  margin-bottom: 32px;
+}
