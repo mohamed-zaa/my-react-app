@@ -1,363 +1,485 @@
+import { useState } from "react";
 
 import {
   BrowserRouter,
   Routes,
   Route,
   Link,
-  NavLink,
-  Outlet,
+  Navigate,
+  useNavigate,
   useParams,
+  useLocation
 } from "react-router-dom";
 
-// Recipe Data
-const recipes = [
-  {
-    id: 1,
-    title: "Classic Chocolate Cake",
-    description: "Rich and moist chocolate cake perfect for any occasion",
-    category: "desserts",
-    ingredients: ["2 cups flour", "1 cup sugar", "3 eggs", "1 cup milk"],
-    instructions: [
-      "Mix dry ingredients",
-      "Add wet ingredients",
-      "Bake at 350°F for 25 minutes",
-    ],
-  },
-  {
-    id: 2,
-    title: "Spaghetti Carbonara",
-    description: "Traditional Italian pasta with creamy egg sauce",
-    category: "dinner",
-    ingredients: ["Spaghetti", "Eggs", "Pecorino cheese", "Black pepper"],
-    instructions: [
-      "Cook pasta",
-      "Mix eggs and cheese",
-      "Combine while hot",
-    ],
-  },
-  {
-    id: 3,
-    title: "Greek Salad",
-    description: "Fresh Mediterranean salad with feta cheese",
-    category: "lunch",
-    ingredients: ["Tomatoes", "Cucumber", "Feta cheese", "Olives"],
-    instructions: [
-      "Chop vegetables",
-      "Add feta cheese and olives",
-      "Mix with olive oil",
-    ],
-  },
-  {
-    id: 4,
-    title: "Breakfast Smoothie Bowl",
-    description: "Healthy and colorful breakfast bowl",
-    category: "breakfast",
-    ingredients: ["Banana", "Strawberries", "Milk", "Granola"],
-    instructions: [
-      "Blend banana and strawberries",
-      "Add milk",
-      "Top with granola and serve",
-    ],
-  },
-];
 
-// Categories
-const categories = [
-  { id: "breakfast", name: "Breakfast", description: "Start your day right" },
-  { id: "lunch", name: "Lunch", description: "Midday favorites" },
-  { id: "dinner", name: "Dinner", description: "Evening meals" },
-  { id: "desserts", name: "Desserts", description: "Sweet treats" },
-];
 
-// Navbar
-function Navbar() {
-  const navStyle = ({ isActive }) =>
-    `text-lg ${isActive ? "text-pink-600 font-bold" : "text-gray-600 hover:text-pink-600"}`;
-
+function Navbar({ isLoggedIn, logout }) {
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-        <Link to="/" className="text-3xl font-bold text-pink-600">
-          Recipe Book
+    <nav className="navbar">
+      <h3>React Blog</h3>
+
+      <div className="nav-links">
+
+        <Link to="/" className="nav-link">
+          Home
         </Link>
 
-        <div className="flex gap-8">
-          <NavLink to="/" end className={navStyle}>
-            Home
-          </NavLink>
+        {isLoggedIn ? (
+          <>
+            <Link to="/create" className="btn">
+              Create Post
+            </Link>
 
-          <NavLink to="/recipes" className={navStyle}>
-            Recipes
-          </NavLink>
+            <button
+              className="btn danger"
+              onClick={logout}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link to="/login" className="btn">
+            Login
+          </Link>
+        )}
 
-          <NavLink to="/categories" className={navStyle}>
-            Categories
-          </NavLink>
-        </div>
       </div>
     </nav>
   );
 }
 
-// Recipe Card
-function RecipeCard({ recipe }) {
-  return (
-    <Link
-      to={`/recipes/${recipe.id}`}
-      className="block bg-white p-7 rounded-xl shadow-md hover:shadow-lg transition"
-    >
-      <h2 className="text-2xl font-bold mb-3 text-black">
-        {recipe.title}
-      </h2>
 
-      <p className="text-lg text-gray-600 leading-relaxed mb-5">
-        {recipe.description}
-      </p>
 
-      <span className="inline-block bg-pink-100 text-pink-700 px-3 py-2 rounded-md">
-        {recipe.category}
-      </span>
-    </Link>
-  );
+function ProtectedRoute({ isLoggedIn, children }) {
+  const location = useLocation();
+
+  if (!isLoggedIn) {
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
+
+  return children;
 }
 
-// Home Page
-function Home() {
-  return (
-    <main className="max-w-6xl mx-auto px-6 py-10">
-      <div className="text-center py-16">
-        <h1 className="text-4xl font-bold mb-5">
-          Welcome to Recipe Book
-        </h1>
 
-        <p className="text-xl text-gray-600 mb-10">
-          Discover delicious recipes for every occasion.
-        </p>
 
-        <div className=" flex justify-center gap-6 flex-wrap">
-          <Link
-            to="/recipes"
-            className="bg-rose-500 p-8 rounded-xl shadow-md hover:shadow-lg"
-          >
-            <h2 className="  text-2xl font-bold mb-2">Browse Recipes</h2>
-            <p className="text-white">Explore our collection of delicious recipes</p>
-          </Link>
+function Home({ posts }) {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-          <Link
-            to="/categories"
-            className="bg-rose-500 p-8 rounded-xl shadow-md hover:shadow-lg"
-          >
-            <h2 className=" text-2xl font-bold mb-2">Recipe Categories</h2>
-            <p className="text-white">find recipes by category</p>
-          </Link>
-        </div>
-      </div>
-    </main>
-  );
-}
+  const params = new URLSearchParams(location.search);
 
-// Recipes Page
-function Recipes() {
-  return (
-    <main className="max-w-6xl mx-auto px-6 py-8">
-      <h1 className="text-4xl font-bold mb-7">All Recipes</h1>
+  const searchTerm = params.get("search") || "";
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-        {recipes.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
-        ))}
-      </div>
-    </main>
-  );
-}
+  const [search, setSearch] = useState(searchTerm);
 
-// Recipe Detail Page
-function RecipeDetail() {
-  const { id } = useParams();
-
-  const recipe = recipes.find(
-    (item) => item.id === Number(id)
+  const filteredPosts = posts.filter((post) =>
+    post.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!recipe) {
-    return <NotFound />;
+  function handleSearch(e) {
+    e.preventDefault();
+
+    navigate(
+      search.trim()
+        ? `/?search=${encodeURIComponent(search.trim())}`
+        : "/"
+    );
   }
 
   return (
-    <main className="max-w-5xl mx-auto px-6 py-7">
-      <div className="bg-white p-8 rounded-xl shadow-md">
-        <Link
-          to="/recipes"
-          className="text-pink-600 text-lg hover:underline"
+    <div className="card">
+
+      <h3>Blog Posts</h3>
+
+      <form onSubmit={handleSearch}>
+
+        <input
+          type="text"
+          placeholder="Search posts..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <button className="btn search-btn">
+          Search
+        </button>
+
+      </form>
+
+      <div className="post-list">
+
+        {filteredPosts.length > 0 ? (
+
+          filteredPosts.map((post) => (
+
+            <Link
+              key={post.id}
+              to={`/posts/${post.id}`}
+              className="post-link"
+            >
+              {post.title}
+            </Link>
+
+          ))
+
+        ) : (
+
+          <p>No posts found.</p>
+
+        )}
+
+      </div>
+
+    </div>
+  );
+}
+
+// ===================================
+// LOGIN PAGE
+// ===================================
+
+function Login({ login }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from || "/";
+
+  function handleLogin() {
+    login();
+
+    navigate(from, { replace: true });
+  }
+
+  return (
+    <div className="card">
+
+      <h3>Login</h3>
+
+      <p>
+        You must log in to access the Create Post page.
+      </p>
+
+      <button
+        className="btn"
+        onClick={handleLogin}
+      >
+        Log In
+      </button>
+
+    </div>
+  );
+}
+
+
+function CreatePost({ addPost }) {
+  const navigate = useNavigate();
+
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!title.trim() || !content.trim()) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    addPost(title.trim(), content.trim());
+
+    navigate("/", { replace: true });
+  }
+
+  return (
+    <div className="card">
+
+      <h3>Create Post</h3>
+
+      <form onSubmit={handleSubmit}>
+
+        <label>Post Title</label>
+
+        <input
+          type="text"
+          placeholder="Enter post title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+
+        <label>Post Content</label>
+
+        <textarea
+          placeholder="Write your post..."
+          rows="5"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+        />
+
+        <button
+          type="submit"
+          className="btn search-btn"
         >
-          ← Back to Recipes
+          Create Post
+        </button>
+
+      </form>
+
+    </div>
+  );
+}
+
+
+
+function PostDetail({ posts }) {
+  const { postId } = useParams();
+
+  const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const index = posts.findIndex(
+    (post) => post.id === Number(postId)
+  );
+
+  if (index === -1) {
+    return (
+      <div className="card">
+
+        <h3>Post Not Found</h3>
+
+        <Link to="/" className="btn">
+          Go Home
         </Link>
 
-        <h1 className="text-4xl font-bold mt-6 mb-8">
-          {recipe.title}
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <section>
-            <h2 className="text-2xl font-bold mb-5">
-              Ingredients
-            </h2>
-
-            <ul className="list-disc pl-7 space-y-3 text-lg">
-              {recipe.ingredients.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-bold mb-5">
-              Instructions
-            </h2>
-
-            <ol className="list-decimal pl-7 space-y-3 text-lg">
-              {recipe.instructions.map((step, index) => (
-                <li key={index}>{step}</li>
-              ))}
-            </ol>
-          </section>
-        </div>
       </div>
-    </main>
-  );
-}
+    );
+  }
 
-// Categories Layout
-function CategoryLayout() {
+  const post = posts[index];
+
+  function nextPost() {
+    if (index < posts.length - 1) {
+
+      navigate(`/posts/${posts[index + 1].id}`, {
+        state: { previousPost: post.id }
+      });
+
+    }
+  }
+
+  function previousPost() {
+    if (index > 0) {
+
+      navigate(`/posts/${posts[index - 1].id}`, {
+        state: { previousPost: post.id }
+      });
+
+    }
+  }
+
   return (
-    <main className="max-w-6xl mx-auto px-6 py-8">
-      <h1 className="text-4xl font-bold mb-7">Categories</h1>
+    <div className="card">
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
-        <aside className="bg-white p-5 rounded-xl shadow-md">
-          <h2 className="text-xl font-bold mb-5">Category List</h2>
+      <h2>{post.title}</h2>
 
-          <div className="flex flex-col gap-3">
-            {categories.map((category) => (
-              <NavLink
-                key={category.id}
-                to={`/categories/${category.id}`}
-                className={({ isActive }) =>
-                  `p-3 rounded-lg ${
-                    isActive
-                      ? "bg-pink-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-pink-100"
-                  }`
-                }
-              >
-                {category.name}
-              </NavLink>
-            ))}
-          </div>
-        </aside>
+      <p>{post.content}</p>
 
-        <section className="md:col-span-3">
-          <Outlet />
-        </section>
+      <small>
+        Previous Post ID: {location.state?.previousPost || "None"}
+      </small>
+
+      <div className="post-buttons">
+
+        <button
+          className="btn"
+          onClick={previousPost}
+          disabled={index === 0}
+        >
+          Previous
+        </button>
+
+        <button
+          className="btn"
+          onClick={nextPost}
+          disabled={index === posts.length - 1}
+        >
+          Next
+        </button>
+
       </div>
-    </main>
-  );
-}
 
-// Categories Home
-function Categories() {
-  return (
-    <div className="bg-white p-7 rounded-xl shadow-md">
-      <h2 className="text-2xl font-bold mb-3">
-        Choose a Category
-      </h2>
-
-      <p className="text-gray-600">
-        Select a category from the sidebar to view recipes.
-      </p>
     </div>
   );
 }
 
-// Filter Category Recipes
-function CategoryRecipes() {
-  const { categoryId } = useParams();
 
-  const category = categories.find(
-    (item) => item.id === categoryId
-  );
 
-  if (!category) return <NotFound />;
-
-  const filteredRecipes = recipes.filter(
-    (recipe) => recipe.category === categoryId
-  );
-
-  return (
-    <div>
-      <h2 className="text-2xl font-bold mb-3">
-        {category.name}
-      </h2>
-
-      <p className="text-gray-600 mb-6">
-        {category.description}
-      </p>
-
-      {filteredRecipes.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {filteredRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-600">
-          No recipes available in this category.
-        </p>
-      )}
-    </div>
-  );
-}
-
-// 404 Page
 function NotFound() {
   return (
-    <div className="text-center py-24">
-      <h1 className="text-7xl font-bold text-pink-600">404</h1>
-      <h2 className="text-2xl font-bold mt-4">Page Not Found</h2>
+    <div className="card">
 
-      <Link
-        to="/"
-        className="inline-block mt-6 bg-pink-600 text-white px-6 py-3 rounded-lg"
-      >
-        Back to Home
+      <h2>404 - Page Not Found</h2>
+
+      <p>
+        The page you are looking for does not exist.
+      </p>
+
+      <Link to="/" className="btn">
+        Go Home
       </Link>
+
     </div>
   );
 }
 
-// Main App
-function App() {
+
+
+function AppContent() {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem("loggedIn") === "true"
+  );
+
+  const [posts, setPosts] = useState([
+
+    {
+      id: 1,
+      title: "Introduction to React",
+      content: "React is a JavaScript library used to build user interfaces."
+    },
+
+    {
+      id: 2,
+      title: "Understanding React Router",
+      content: "React Router is used for navigation between pages."
+    },
+
+    {
+      id: 3,
+      title: "React Hooks in Depth",
+      content: "React Hooks allow functional components to use React features."
+    }
+
+  ]);
+
+  
+
+  function login() {
+    localStorage.setItem("loggedIn", "true");
+
+    setIsLoggedIn(true);
+  }
+
+  
+
+  function logout() {
+    localStorage.removeItem("loggedIn");
+
+    setIsLoggedIn(false);
+  }
+
+  
+
+  function addPost(title, content) {
+
+    const newPost = {
+      id: Date.now(),
+      title,
+      content
+    };
+
+    setPosts((prevPosts) => [
+      ...prevPosts,
+      newPost
+    ]);
+
+  }
+
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-gray-100">
-        <Navbar />
+    <>
+
+      <Navbar
+        isLoggedIn={isLoggedIn}
+        logout={logout}
+      />
+
+      <div className="container">
 
         <Routes>
-          <Route path="/" element={<Home />} />
 
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/recipes/:id" element={<RecipeDetail />} />
+          
 
-          <Route path="/categories" element={<CategoryLayout />}>
-            <Route index element={<Categories />} />
-            <Route path=":categoryId" element={<CategoryRecipes />} />
-          </Route>
+          <Route
+            path="/"
+            element={
+              <Home posts={posts} />
+            }
+          />
 
-          <Route path="*" element={<NotFound />} />
+          
+
+          <Route
+            path="/login"
+            element={
+              isLoggedIn
+                ? <Navigate to="/" replace />
+                : <Login login={login} />
+            }
+          />
+
+         
+
+          <Route
+            path="/create"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <CreatePost addPost={addPost} />
+              </ProtectedRoute>
+            }
+          />
+
+          
+
+          <Route
+            path="/posts/:postId"
+            element={
+              <PostDetail posts={posts} />
+            }
+          />
+
+          
+
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
+
         </Routes>
+
       </div>
-    </BrowserRouter>
+
+    </>
   );
 }
 
-export default App;
+
+
+export default function App() {
+
+  return (
+    <BrowserRouter>
+
+      <AppContent />
+
+    </BrowserRouter>
+  );
+
+}
